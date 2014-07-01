@@ -67,7 +67,7 @@ network <- createEmptyNetwork(dataAttrNames = c('label','expression'),
                            edgeAttrNames = c('type'),
                            edgeAttrTypes = c('string'));
 
-network <- network.addNode(network, '1', label="G1")
+network <- network.addNode(network, '1', label="G1", expression="underexpressed")
 network <- network.addNode(network, '2', label="G2", expression="overexpressed")
 network <- network.addNode(network, '3', label="G3")
 

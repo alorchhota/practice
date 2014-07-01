@@ -23,7 +23,7 @@ dataSchema[['nodes']] <- schemaNodes
 dataSchema[['edges']] <- schemaEdges
 
 ## defien value obj
-node1 <- list(id='1', label='G1')
+node1 <- list(id='1', label='G1', expression='underexpressed')
 node2 <- list(id='2', label='G2', expression='overexpressed')
 node3 <- list(id='3', label='G3')
 
