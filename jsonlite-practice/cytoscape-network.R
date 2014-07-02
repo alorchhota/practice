@@ -84,6 +84,8 @@ network.addEdge <- function(network, edgeId, ...){
 }
 
 
+
+
 #### network creation example #######
 network <- createEmptyNetwork(dataAttrNames = c('label','expression', 'color'), 
                            dataAttrTypes = c('string', 'string', 'string'), 
@@ -102,5 +104,5 @@ network <- network.addEdge(network, '2', source='1', target='3')
 network <- network.addEdge(network, '3', source='2', target='3')
 
 
-jsonObj <- toJSON(network)
+jsonObj <- toJSON(network, auto_unbox = T)
 cat(prettify(jsonObj))
