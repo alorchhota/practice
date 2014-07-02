@@ -7,7 +7,7 @@
 library(jsonlite)
 library(RCurl)
 
-createDataSchemaObj <- function(dataAttrNames, dataAttrTypes, edgeAttrNames, edgeAttrTypes){
+createDataSchemaObj <- function(dataAttrNames, dataAttrTypes, dataAttrDefaultValues=NULL, edgeAttrNames, edgeAttrTypes, edgeAttrDefaultValues=NULL){
   #if(class(dataAttrNames) != 'character' || class(dataAttrTypes) != 'character'|| class(edgeAttrNames) != 'character'|| class(edgeAttrTypes) != 'character')
   #  stop('Node and edge attribute names and types must be string.')
   
@@ -17,17 +17,40 @@ createDataSchemaObj <- function(dataAttrNames, dataAttrTypes, edgeAttrNames, edg
   if(length(edgeAttrNames) != length(edgeAttrTypes))
     stop('Edge attribute names and values must be of same length.')
   
+  if(!is.null(dataAttrDefaultValues) && length(dataAttrNames) != length(dataAttrDefaultValues))
+    stop('Node attribute default values will be either null or a vector/list of same length as attribute names.')
+  
+  if(!is.null(edgeAttrDefaultValues) && length(edgeAttrNames) != length(edgeAttrDefaultValues))
+    stop('Edge attribute default values will be either null or a vector/list of same length as attribute names.')
+  
   ## create node attributes
   schemaNodes <- list()
   dataLen <- length(dataAttrNames)
   if(dataLen > 0)
-    schemaNodes <- lapply(1:dataLen, function(idx) list(name=dataAttrNames[idx], type=dataAttrTypes[idx]))
+    schemaNodes <- lapply(1:dataLen, function(idx){
+      nodeObj <- NULL
+      if(!is.null(dataAttrDefaultValues) && !is.na(dataAttrDefaultValues[[idx]])){
+        nodeObj <- list(name=dataAttrNames[idx], type=dataAttrTypes[idx], defValue=dataAttrDefaultValues[[idx]])
+      } else{
+        nodeObj <- list(name=dataAttrNames[idx], type=dataAttrTypes[idx])
+      }
+      return(nodeObj)
+    })
+  
   
   ## create edge attributes
   schemaEdges <- list()
   edgeLen <- length(edgeAttrNames)
   if(edgeLen>0)
-    schemaEdges <- lapply(1:edgeLen, function(idx) list(name=edgeAttrNames[idx], type=edgeAttrTypes[idx]))
+    schemaEdges <- lapply(1:edgeLen, function(idx){
+      edgeObj <- NULL
+      if(!is.null(edgeAttrDefaultValues) && !is.na(edgeAttrDefaultValues[[idx]])){
+        edgeObj <- list(name=edgeAttrNames[idx], type=edgeAttrTypes[idx], defValue=edgeAttrDefaultValues[[idx]])
+      } else{
+        edgeObj <- list(name=edgeAttrNames[idx], type=edgeAttrTypes[idx])
+      }
+      return(edgeObj)
+    })
   
   ## create schema
   dataSchema <- list()
@@ -37,8 +60,8 @@ createDataSchemaObj <- function(dataAttrNames, dataAttrTypes, edgeAttrNames, edg
   return(dataSchema)
 }
 
-createEmptyNetwork <- function(dataAttrNames, dataAttrTypes, edgeAttrNames, edgeAttrTypes){
-  dataSchema <- createDataSchemaObj(dataAttrNames, dataAttrTypes, edgeAttrNames, edgeAttrTypes);
+createEmptyNetwork <- function(dataAttrNames, dataAttrTypes, dataAttrDefaultValues=NULL, edgeAttrNames, edgeAttrTypes, edgeAttrDefaultValues=NULL){
+  dataSchema <- createDataSchemaObj(dataAttrNames, dataAttrTypes, dataAttrDefaultValues, edgeAttrNames, edgeAttrTypes, edgeAttrDefaultValues);
   dataValues <- list(nodes=list(), edges=list())
   network <- list(dataSchema=dataSchema, data=dataValues)
   return(network)  
@@ -62,10 +85,13 @@ network.addEdge <- function(network, edgeId, ...){
 
 
 #### network creation example #######
-network <- createEmptyNetwork(dataAttrNames = c('label','expression'), 
-                           dataAttrTypes = c('string', 'string'), 
-                           edgeAttrNames = c('type'),
-                           edgeAttrTypes = c('string'));
+network <- createEmptyNetwork(dataAttrNames = c('label','expression', 'color'), 
+                           dataAttrTypes = c('string', 'string', 'string'), 
+                           dataAttrDefaultValues = c(NA,NA,'orange'),
+                           edgeAttrNames = c('type','directed'),
+                           edgeAttrTypes = c('string','boolean'),
+                           edgeAttrDefaultValues = list(NA, FALSE)
+                           );
 
 network <- network.addNode(network, '1', label="G1", expression="underexpressed")
 network <- network.addNode(network, '2', label="G2", expression="overexpressed")
